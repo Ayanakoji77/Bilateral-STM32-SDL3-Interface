@@ -19,6 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#include <stdint.h>
+
+#include "stm32f411xe.h"
 #include "stm32f4xx_hal_gpio.h"
 #include "usb_device.h"
 
@@ -97,20 +100,49 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1)
     {
+        char c_msg[1] = "0";
+        static char p_msg[1] = "0";
         if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
         {
-            char msg = 'U';
-            CDC_Transmit_FS((int8_t*)msg, 1);
-            HAL_Delay(200);
+            c_msg[0] = 'U';
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
         }
         else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET)
         {
-            char msg = 'L';
-            CDC_Transmit_FS((int8_t*)msg, strlen(msg));
-            HAL_Delay(200);
+            c_msg[0] = 'L';
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+        }
+        else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET)
+        {
+            c_msg[0] = 'R';
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+        }
+        else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_RESET)
+        {
+            c_msg[0] = 'D';
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+        }
+        else
+        {
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
         }
         /* USER CODE END WHILE */
+        static uint8_t buffer[2];
+        if (c_msg[0] != p_msg[0] && c_msg[0] != '0')
+        {
+            p_msg[0] = c_msg[0];
 
+            buffer[0] = c_msg[0];
+            buffer[1] = '\n';
+
+            CDC_Transmit_FS(buffer, 2);
+        }
+        else if (c_msg[0] == '0')
+        {
+            p_msg[0] = '0';
+        }
+
+        HAL_Delay(100);
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
@@ -192,7 +224,7 @@ static void MX_GPIO_Init(void)
     /* USER CODE BEGIN MX_GPIO_Init_2 */
 
     /* Button setup for  B side*/
-    GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_12 | GPIO_PIN_14 | GPIO_PIN_15;
+    GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
