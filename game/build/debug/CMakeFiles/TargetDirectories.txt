@@ -1,0 +1,5 @@
+/home/sbehera/Desktop/game-development/Game Dev using SDL3/build/debug/CMakeFiles/edit_cache.dir
+/home/sbehera/Desktop/game-development/Game Dev using SDL3/build/debug/CMakeFiles/rebuild_cache.dir
+/home/sbehera/Desktop/game-development/Game Dev using SDL3/build/debug/src/CMakeFiles/galaxy.dir
+/home/sbehera/Desktop/game-development/Game Dev using SDL3/build/debug/src/CMakeFiles/edit_cache.dir
+/home/sbehera/Desktop/game-development/Game Dev using SDL3/build/debug/src/CMakeFiles/rebuild_cache.dir
