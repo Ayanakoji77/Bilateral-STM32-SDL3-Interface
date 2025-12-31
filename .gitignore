@@ -6,6 +6,9 @@ bin/
 *.cmake
 *.ninja
 Makefile
+
+*CMakeCache*
+*CMakeFiles*
 # Compiled Object files
 *.slo
 *.lo

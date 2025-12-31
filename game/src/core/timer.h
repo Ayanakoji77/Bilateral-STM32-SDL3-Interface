@@ -10,16 +10,21 @@ class Timer
 
     void step(float deltaTime)
     {
+        timeout = false;
         time += deltaTime;
-        if (time >= length)
+        while (time >= length)
         {
             time -= length;
             timeout = true;
         }
     }
 
-    bool isTImeout() const { return timeout; }
+    bool isTimeout() const { return timeout; }
     float getTime() const { return time; }
     float getLength() const { return length; }
-    void reset() { time = 0; }
+    void reset()
+    {
+        time = 0;
+        timeout = false;
+    }
 };
