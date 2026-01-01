@@ -4,7 +4,6 @@
 
 #include <glm/ext/vector_float2.hpp>
 #include <glm/glm.hpp>
-#include <vector>
 
 class GameObject
 {
@@ -32,12 +31,12 @@ class GameObject
         }
     }
 
-    virtual void Render(SDL_Renderer* renderer)
+    virtual void Render(SDL_Renderer* renderer, glm::vec2 offset)
     {
         if (!texture)
             return;
 
-        SDL_FRect dst = {position.x, position.y, collider.w, collider.h};
+        SDL_FRect dst = {position.x + offset.x, position.y + offset.y, collider.w, collider.h};
 
         SDL_RenderTexture(renderer, texture, nullptr, &dst);
     }

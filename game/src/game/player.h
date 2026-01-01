@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/fwd.hpp>
 #include <vector>
 
 #include "core/animation.h"
@@ -20,7 +21,7 @@ class Player : public GameObject
     float maxSpeedX = 80.0f;
     float direction = 1.0f;
     glm::vec2 acceleration{250.0f, 0.0f};
-    float jump_power = -20.0f;
+    float jump_power = -200.0f;
     std::vector<Animation> animations;
     int currentAnim = 0;
     bool grounded = false;
@@ -28,7 +29,7 @@ class Player : public GameObject
    public:
     Player(SDL_Texture* atlasTexture);
     void update(float deltaTime, const bool* keys) override;
-    void Render(SDL_Renderer* renderer) override;
+    void Render(SDL_Renderer* renderer, glm::vec2 offset) override;
     void setGrounded(bool val) { grounded = val; }
     bool isGrounded() { return grounded; }
 };

@@ -4,6 +4,8 @@
 #include <SDL3/SDL_scancode.h>
 
 #include <cstdlib>
+#include <format>
+#include <glm/fwd.hpp>
 
 Player::Player(SDL_Texture* atlasTexture)
 {
@@ -14,41 +16,71 @@ Player::Player(SDL_Texture* atlasTexture)
     this->dynamic = true;
     this->collider = {10, 18, 14, 14};
 
-    animations.emplace_back(4, 1.2f, 2, 32, 32);  // idel
-    animations.emplace_back(8, 0.6f, 3, 32, 32);  // run
+    animations.emplace_back(4, 0.6f, 2, 32, 32);  // idel
+    animations.emplace_back(8, 1.2f, 3, 32, 32);  // run
+    animations.emplace_back(8, 1.2f, 5, 32, 32);  // jump
+    animations.emplace_back(2, 0.3f, 0, 32, 32);  // slide
 }
 
 void Player::update(float deltaTime, const bool* keys)
 {
     float dirInput = 0;
+
     if (keys[SDL_SCANCODE_A])
         dirInput = -1;
     if (keys[SDL_SCANCODE_D])
         dirInput = 1;
+    bool jumpPressed = keys[SDL_SCANCODE_SPACE];
+    switch (state)
+    {
+        case PlayerState::Idle:
+            if (jumpPressed && this->isGrounded())
+            {
+                state = PlayerState::Jumping;
+                velocity.y = -200.f;
+                this->setGrounded(false);
+            }
+            else if (dirInput != 0)
+            {
+                state = PlayerState::Running;
+            }
+            currentAnim = 0;
+            break;
+        case PlayerState::Running:
+            if (jumpPressed && this->isGrounded())
+            {
+                state = PlayerState::Jumping;
+                velocity.y = -200.0f;
+                this->setGrounded(false);
+            }
+            else if (dirInput == 0 && std::abs(velocity.x) < 5.0f)
+            {
+                state = PlayerState::Idle;
+            }
+            else if (velocity.x * direction < 0 && this->isGrounded())
+            {
+                currentAnim = 3;
+            }
+            else
+            {
+                currentAnim = 1;
+            }
+
+            break;
+        case PlayerState::Jumping:
+            if (this->isGrounded())
+            {
+                if (dirInput != 0)
+                    state = PlayerState::Running;
+                else
+                    state = PlayerState::Idle;
+            }
+            currentAnim = 2;
+            break;
+    }
 
     if (dirInput != 0)
-    {
-        state = PlayerState::Running;
         direction = dirInput;
-        currentAnim = 1;
-    }
-    else if (std::abs(velocity.x) > 0.1f)
-    {
-        state = PlayerState::Idle;
-        currentAnim = 0;
-    }
-    else
-    {
-        state = PlayerState::Idle;
-        currentAnim = 0;
-    }
-    if (keys[SDL_SCANCODE_H] && this->isGrounded())
-    {
-        state = PlayerState::Jumping;
-        this->velocity.y = this->jump_power;
-        this->setGrounded(false);
-    }
-
     // gravity
     velocity.y = velocity.y + (500.0f * deltaTime);
     // aceleration
@@ -56,8 +88,7 @@ void Player::update(float deltaTime, const bool* keys)
 
     if (std::abs(velocity.x) > maxSpeedX)
     {
-        float sign = (velocity.x > 0) ? 1.0f : -1.0f;
-        velocity.x = sign * maxSpeedX;
+        velocity.x = (velocity.x > 0 ? 1.0f : -1.0f) * maxSpeedX;
     }
 
     if (dirInput == 0 && velocity.x != 0)
@@ -83,15 +114,19 @@ void Player::update(float deltaTime, const bool* keys)
     GameObject::update(deltaTime, keys);
 }
 
-void Player::Render(SDL_Renderer* renderer)
+void Player::Render(SDL_Renderer* renderer, glm::vec2 offset)
 {
     if (animations.empty())
         return;
 
     SDL_FRect src = animations[currentAnim].GetCurrentFrameSrc();
 
-    SDL_FRect dst = {position.x, position.y, src.w, src.h};
+    SDL_FRect dst = {position.x + offset.x, position.y + offset.y, src.w, src.h};
 
     SDL_FlipMode flip = (direction == -1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     SDL_RenderTextureRotated(renderer, texture, &src, &dst, 0, nullptr, flip);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDebugText(renderer, 5, 5,
+                        std::format("State:{}", static_cast<int>(this->state)).c_str());
 }

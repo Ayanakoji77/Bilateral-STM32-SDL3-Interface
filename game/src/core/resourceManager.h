@@ -2,13 +2,13 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
-#include <map>
 #include <string>
+#include <unordered_map>
 
 class ResourceManager
 {
     SDL_Renderer* renderer;
-    std::map<std::string, SDL_Texture*> textures;
+    std::unordered_map<std::string, SDL_Texture*> textures;
     const char* basePath;
 
    public:

@@ -3,6 +3,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 
 #include "core/resourceManager.h"
@@ -56,6 +58,8 @@ bool Application::Initialize()
     resourceManager->LoadTexture("panel", "data/Panel.png");
     resourceManager->LoadTexture("grass", "data/Grass.png");
     resourceManager->LoadTexture("brick", "data/Brick.png");
+    resourceManager->LoadTexture("background", "data/Background_1.png");
+    resourceManager->LoadTexture("background", "data/Background_2.png");
 
     // intialize input
     this->keys = SDL_GetKeyboardState(nullptr);
@@ -113,12 +117,15 @@ void Application::Run()
         }
 
         // render game
-        SDL_SetRenderDrawColor(renderer, 20, 10, 30, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 20, 10, 30, 255);
+        SDL_FRect bgreact = {0, 0, static_cast<float>(logWidth), static_cast<float>(logHeight)};
+        SDL_RenderFillRect(renderer, &bgreact);
 
         if (currentLevel)
         {
-            currentLevel->Render(renderer);
+            currentLevel->Render(renderer, resourceManager);
         }
 
         SDL_RenderPresent(renderer);

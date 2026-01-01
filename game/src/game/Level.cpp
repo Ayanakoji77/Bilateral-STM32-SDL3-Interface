@@ -2,7 +2,11 @@
 
 #include <SDL3/SDL.h>
 
+#include <memory>
+
+#include "core/camera.h"
 #include "core/resourceManager.h"
+#include "game/gameobject.h"
 #include "player.h"
 
 void Level::LoadMap(ResourceManager* res)
@@ -17,9 +21,14 @@ void Level::LoadMap(ResourceManager* res)
      */
 
     short map[MAP_ROWS][MAP_COLS] = {0};
-    map[2][2] = 4;
-    map[4][0] = map[4][1] = map[4][2] = map[3][3] = map[3][0] = 2;
-    bool playerFound = false;
+    map[2][4] = 4;
+    map[3][1] = map[3][2] = map[2][2] = map[3][6] = map[3][7] = map[3][8] = map[3][9] = map[2][7] =
+        map[3][12] = map[3][15] = 2;
+    for (int j = 0; j < MAP_COLS; j++)
+    {
+        map[4][j] = 1;
+    }
+    camera = std::make_unique<Camera>(640, 320, MAP_COLS * TILE_SIZE, 320);
     for (int r = 0; r < MAP_ROWS; r++)
     {
         for (int c = 0; c < MAP_COLS; c++)
@@ -32,10 +41,11 @@ void Level::LoadMap(ResourceManager* res)
             float y = (320) - (MAP_ROWS - r) * TILE_SIZE;
             if (type == 4)
             {
-                playerFound = true;
-                auto p = std::make_unique<Player>(res->GetTexture("player"));
-                p->position = {x, y};
-                layers[LAYER_IDX_CHARACTERS].push_back(std::move(p));
+                auto pl = std::make_unique<Player>(res->GetTexture("player"));
+                pl->position = {x, y};
+                this->player = pl.get();
+                pl->tag = GameObject::Tag::player;
+                layers[LAYER_IDX_CHARACTERS].push_back(std::move(pl));
             }
             else if (type == 2)
             {
@@ -45,9 +55,17 @@ void Level::LoadMap(ResourceManager* res)
                 panel->tag = GameObject::Tag::level;
                 layers[LAYER_IDX_LEVEL].push_back(std::move(panel));
             }
+            else if (type == 1)
+            {
+                auto ground = std::make_unique<GameObject>();
+                ground->texture = res->GetTexture("ground");
+                ground->position = {x, y};
+                ground->tag = GameObject::Tag::level;
+                layers[LAYER_IDX_LEVEL].push_back(std::move(ground));
+            }
         }
     }
-    SDL_assert_release(playerFound && "No Player intialized check itup ");
+    SDL_assert_release(this->player != nullptr && "No Player intialized check itup ");
 }
 
 void Level::Update(float deltaTime, const bool* keys)
@@ -59,18 +77,22 @@ void Level::Update(float deltaTime, const bool* keys)
             obj->update(deltaTime, keys);
         }
     }
-
+    if (player)
+    {
+        camera->Follow(player->position);
+    }
     // Check Physics
     CheckCollisions(deltaTime);
 }
 
-void Level::Render(SDL_Renderer* renderer)
+void Level::Render(SDL_Renderer* renderer, ResourceManager* res)
 {
+    SDL_RenderTexture(renderer, res->GetTexture("background_1"), nullptr, nullptr);
     for (int i = 0; i < this->TOTAL_LAYERS; i++)
     {
         for (auto& obj : layers[i])
         {
-            obj->Render(renderer);
+            obj->Render(renderer, camera->GetOffset());
         }
     }
 }

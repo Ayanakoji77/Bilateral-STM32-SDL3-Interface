@@ -20,22 +20,6 @@ class Animation
     }
 
     float getLength() const { return timer.getLength(); }
-
-    int currentFrame() const
-    {
-        // divisio by zero not happen
-        if (frameCount == 0)
-            return 0;
-
-        // raw frame index cal
-        int frame = static_cast<int>(timer.getTime() / timer.getLength() * frameCount);
-        // to not get the frame count = frame , length = index out of bounds saved
-        if (frame >= frameCount)
-        {
-            frame = frameCount - 1;
-        }
-        return frame;
-    }
     SDL_FRect GetCurrentFrameSrc() const
     {
         int currentFrameIndex = 0;
