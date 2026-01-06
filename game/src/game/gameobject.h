@@ -19,7 +19,8 @@ class GameObject
     {
         player,
         level,
-        enemy
+        enemy,
+        bullet
     } tag = Tag::level;
     virtual ~GameObject() = default;
 

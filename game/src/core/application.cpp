@@ -3,8 +3,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_video.h>
 
 #include "core/resourceManager.h"
@@ -58,8 +60,9 @@ bool Application::Initialize()
     resourceManager->LoadTexture("panel", "data/Panel.png");
     resourceManager->LoadTexture("grass", "data/Grass.png");
     resourceManager->LoadTexture("brick", "data/Brick.png");
-    resourceManager->LoadTexture("background", "data/Background_1.png");
-    resourceManager->LoadTexture("background", "data/Background_2.png");
+    resourceManager->LoadTexture("background_1", "data/Background_1.png");
+    resourceManager->LoadTexture("background_2", "data/Background_2.png");
+    resourceManager->LoadTexture("bullet", "data/bullet-sheet.png");
 
     // intialize input
     this->keys = SDL_GetKeyboardState(nullptr);
@@ -68,9 +71,11 @@ bool Application::Initialize()
     SDL_SetRenderLogicalPresentation(this->renderer, this->logWidth, this->logHeight,
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
+    SDL_SetRenderVSync(this->renderer, 1);
     // intialize level
     currentLevel = new Level();
     currentLevel->LoadMap(this->resourceManager);
+
     return initSuccess;
 }
 
@@ -108,6 +113,10 @@ void Application::Run()
                 this->GAME_WIDTH = event.window.data1;
                 this->GAME_HEIGHT = event.window.data2;
             }
+            else if (keys[SDL_SCANCODE_F3])
+            {
+                debugMode = !debugMode;
+            }
         }
 
         // game update level
@@ -125,7 +134,7 @@ void Application::Run()
 
         if (currentLevel)
         {
-            currentLevel->Render(renderer, resourceManager);
+            currentLevel->Render(renderer, debugMode);
         }
 
         SDL_RenderPresent(renderer);

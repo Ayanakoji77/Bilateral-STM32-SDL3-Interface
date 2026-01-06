@@ -18,6 +18,7 @@ class Application
     int GAME_HEIGHT = 900;
     const int logWidth = 640;
     const int logHeight = 320;
+    bool debugMode = false;
 
    public:
     bool Initialize();
