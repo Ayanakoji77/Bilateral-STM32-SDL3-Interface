@@ -14,7 +14,7 @@ Player::Player(SDL_Texture* atlasTexture)
     this->tag = Tag::player;
     this->dynamic = true;
     this->collider = {8, 6, 14, 26};
-
+    weaponTimer.step(20.0f);
     animations.emplace_back(4, 0.6f, 2, 32, 32);  // idel
     animations.emplace_back(8, 1.2f, 3, 32, 32);  // run
     animations.emplace_back(8, 1.2f, 5, 32, 32);  // jump

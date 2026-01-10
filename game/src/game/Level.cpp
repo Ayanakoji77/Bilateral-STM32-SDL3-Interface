@@ -44,8 +44,20 @@ void Level::LoadMap(ResourceManager* res)
                     pl->position = {x, y};
                     pl->onShoot = [this, res](glm::vec2 pos, float dir)
                     {
-                        Bullet b(res->GetTexture("bullet"), pos, dir);
-                        this->bullets.push_back(std::move(b));
+                        bool found_bullet = false;
+                        for (int i = 0; i < (int)bullets.size() && !found_bullet; i++)
+                        {
+                            if (bullets[i].GetState() == BulletState::Inactive)
+                            {
+                                bullets[i].reset(pos, dir);
+                                found_bullet = true;
+                            }
+                        }
+                        if (!found_bullet)
+                        {
+                            Bullet b(res->GetTexture("bullet"), pos, dir);
+                            this->bullets.push_back(std::move(b));
+                        }
                     };
                     this->player = pl.get();
                     pl->tag = GameObject::Tag::player;
@@ -105,18 +117,6 @@ void Level::Update(float deltaTime, const bool* keys)
         obj.update(deltaTime, keys);
     }
 
-    float min_x_boudary = -100.0f;
-    float max_x_boundary = (MAP_COLS * TILE_SIZE) + 100.0f;
-
-    auto it = std::remove_if(
-        bullets.begin(), bullets.end(), [min_x_boudary, max_x_boundary](const Bullet& b)
-        { return (b.position.x < min_x_boudary || b.position.x > max_x_boundary); });
-
-    if (it != bullets.end())
-    {
-        bullets.erase(it, bullets.end());
-    }
-
     if (player)
     {
         camera->Follow(player->position);
@@ -154,6 +154,8 @@ void Level::Render(SDL_Renderer* renderer, bool debugMode)
     }
     for (auto& obj : bullets)
     {
+        if (obj.GetState() == BulletState::Inactive)
+            continue;
         obj.Render(renderer, camera->GetOffset());
         if (debugMode)
         {
@@ -214,9 +216,9 @@ void Level::ParallaxBackgroundDraw(SDL_Renderer* renderer)
 
 void Level::CheckCollisions(float deltaTime)
 {
-    for (auto& character : layers[LAYER_IDX_CHARACTERS])
+    for (auto& tile : layers[LAYER_IDX_LEVEL])
     {
-        for (auto& tile : layers[LAYER_IDX_LEVEL])
+        for (auto& character : layers[LAYER_IDX_CHARACTERS])
         {
             if (!character->dynamic)
                 continue;
@@ -234,11 +236,33 @@ void Level::CheckCollisions(float deltaTime)
                 ResolveCollision(*character, *tile, deltaTime, intersection);
             }
         }
+        for (auto& b : bullets)
+        {
+            if (b.GetState() == BulletState::Inactive)
+            {
+                continue;
+            }
+            else
+            {
+                SDL_FRect rectA = {b.position.x + b.collider.x, b.position.y + b.collider.y,
+                                   b.collider.w, b.collider.h};
+                SDL_FRect rectB = {tile->position.x + tile->collider.x,
+                                   tile->position.y + tile->collider.y, tile->collider.w,
+                                   tile->collider.h};
+                SDL_FRect intersection;
+                if (SDL_GetRectIntersectionFloat(&rectA, &rectB, &intersection))
+                {
+                    ResolveCollision(b, *tile, deltaTime, intersection);
+                    b.SetState(BulletState::Colliding);
+                }
+            }
+        }
     }
 }
 void Level::ResolveCollision(GameObject& a, GameObject& b, float deltaTime, SDL_FRect intersection)
 {
-    if (a.tag == GameObject::Tag::player && b.tag == GameObject::Tag::level)
+    if ((a.tag == GameObject::Tag::player || a.tag == GameObject::Tag::bullet) &&
+        b.tag == GameObject::Tag::level)
     {
         // Horizontal Collision
         if (intersection.w < intersection.h)

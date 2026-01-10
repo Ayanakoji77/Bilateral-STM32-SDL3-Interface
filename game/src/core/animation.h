@@ -39,5 +39,7 @@ class Animation
 
         return src;
     }
+    bool isDone() { return timer.isTimeout(); }
+    void reset() { timer.reset(); }
     void step(float deltaTime) { timer.step(deltaTime); }
 };
