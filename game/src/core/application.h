@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
 
+#include "driver/SerialController.h"
 #include "game/Level.h"
 #include "resourceManager.h"
 class Application
@@ -9,7 +10,7 @@ class Application
    private:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
-
+    SerialController* serialController;
     const bool* keys = nullptr;
     const char* basePath = nullptr;
     ResourceManager* resourceManager = nullptr;

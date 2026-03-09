@@ -13,6 +13,7 @@
 
 #include "core/camera.h"
 #include "core/resourceManager.h"
+#include "driver/SerialController.h"
 #include "game/bullet.h"
 #include "game/gameobject.h"
 #include "player.h"
@@ -103,7 +104,7 @@ void Level::LoadMap(ResourceManager* res)
     SDL_assert_release(this->player != nullptr && "No Player intialized check itup ");
 }
 
-void Level::Update(float deltaTime, const bool* keys)
+void Level::Update(float deltaTime, const bool* keys, SerialController* serialController)
 {
     for (auto& layer : layers)
     {
@@ -119,6 +120,7 @@ void Level::Update(float deltaTime, const bool* keys)
 
     if (player)
     {
+        player->update(deltaTime, keys, serialController);
         camera->Follow(player->position);
     }
 

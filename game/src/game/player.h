@@ -5,6 +5,7 @@
 
 #include "core/animation.h"
 #include "core/timer.h"
+#include "driver/SerialController.h"
 #include "gameobject.h"
 
 enum class PlayerState
@@ -34,7 +35,7 @@ class Player : public GameObject
     std::function<void(glm::vec2, float)> onShoot;
     Player(SDL_Texture* atlasTexture);
     PlayerState getState() { return state; }
-    void update(float deltaTime, const bool* keys) override;
+    void update(float deltaTime, const bool* keys, SerialController* controller = nullptr) override;
     void Render(SDL_Renderer* renderer, glm::vec2 offset) override;
     void setGrounded(bool val) { grounded = val; }
     bool isGrounded() { return grounded; }

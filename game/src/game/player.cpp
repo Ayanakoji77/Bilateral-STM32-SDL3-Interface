@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <glm/fwd.hpp>
 
+#include "driver/SerialController.h"
+
 Player::Player(SDL_Texture* atlasTexture)
 {
     // loading texture pointer
@@ -21,7 +23,7 @@ Player::Player(SDL_Texture* atlasTexture)
     animations.emplace_back(2, 0.3f, 0, 32, 32);  // slide
 }
 
-void Player::update(float deltaTime, const bool* keys)
+void Player::update(float deltaTime, const bool* keys, SerialController* controller)
 {
     float dirInput = 0;
     if (keys[SDL_SCANCODE_A])
@@ -29,6 +31,16 @@ void Player::update(float deltaTime, const bool* keys)
     if (keys[SDL_SCANCODE_D])
         dirInput = 1;
     bool jumpPressed = keys[SDL_SCANCODE_SPACE];
+    if (controller && controller->IsConnected())
+    {
+        if (controller->IsLeft())
+            dirInput = -1;
+        if (controller->IsRight())
+            dirInput = 1;
+        // Logic for Jump (Up button)
+        if (controller->IsUp())
+            jumpPressed = true;
+    }
     if (keys[SDL_SCANCODE_E])
     {
         if (weaponTimer.isTimeout())

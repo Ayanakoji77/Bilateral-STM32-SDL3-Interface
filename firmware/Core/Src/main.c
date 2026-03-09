@@ -100,52 +100,41 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1)
     {
-        char c_msg[1] = "0";
-        static char p_msg[1] = "0";
+        uint8_t packet = 0;
+
+        // 1. Read Buttons (Active Low: 0 means Pressed)
+        // Bit 0: UP
         if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
         {
-            c_msg[0] = 'U';
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+            packet |= (1 << 0);
         }
-        else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET)
+        // Bit 1: DOWN
+        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_RESET)
         {
-            c_msg[0] = 'L';
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+            packet |= (1 << 1);
         }
-        else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET)
+        // Bit 2: LEFT
+        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET)
         {
-            c_msg[0] = 'R';
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+            packet |= (1 << 2);
         }
-        else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_RESET)
+        // Bit 3: RIGHT
+        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET)
         {
-            c_msg[0] = 'D';
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+            packet |= (1 << 3);
         }
-        else
-        {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-        }
+
+        // 2. Transmit the packet
+        // We send it EVERY loop for now to ensure we see data.
+        // Later we can optimize to only send on change.
+        CDC_Transmit_FS(&packet, 1);
+
+        // 3. Delay
+        // 10ms = 100 updates per second (Fast enough for games)
+        HAL_Delay(10);
+
         /* USER CODE END WHILE */
-        static uint8_t buffer[2];
-        if (c_msg[0] != p_msg[0] && c_msg[0] != '0')
-        {
-            p_msg[0] = c_msg[0];
-
-            buffer[0] = c_msg[0];
-            buffer[1] = '\n';
-
-            CDC_Transmit_FS(buffer, 2);
-        }
-        else if (c_msg[0] == '0')
-        {
-            p_msg[0] = '0';
-        }
-
-        HAL_Delay(100);
-        /* USER CODE BEGIN 3 */
-    }
-    /* USER CODE END 3 */
+    } /* USER CODE END 3 */
 }
 
 /**

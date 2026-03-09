@@ -5,6 +5,8 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/glm.hpp>
 
+#include "driver/SerialController.h"
+
 class GameObject
 {
    public:
@@ -24,7 +26,7 @@ class GameObject
     } tag = Tag::level;
     virtual ~GameObject() = default;
 
-    virtual void update(float deltaTime, const bool* keys)
+    virtual void update(float deltaTime, const bool* keys, SerialController* controller = nullptr)
     {
         if (dynamic)
         {

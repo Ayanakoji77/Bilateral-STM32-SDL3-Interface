@@ -6,6 +6,7 @@
 
 #include <glm/fwd.hpp>
 
+#include "driver/SerialController.h"
 #include "game/gameobject.h"
 Bullet::Bullet(SDL_Texture* atlasTexture, glm::vec2 position, float direction)
 {
@@ -35,8 +36,10 @@ void Bullet::reset(glm::vec2 pos, float dir)
         animations[currentAnim].reset();
     }
 }
-void Bullet::update(float deltaTime, const bool* keys)
+void Bullet::update(float deltaTime, const bool* keys, SerialController* controller)
 {
+    (void)keys;
+    (void)controller;
     float min_x_boudary = -100.0f;
     float max_x_boundary = (50 * 32) + 100.0f;
     if (state == BulletState::Moving)

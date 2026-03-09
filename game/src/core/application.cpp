@@ -10,6 +10,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "core/resourceManager.h"
+#include "driver/SerialController.h"
 
 bool Application::Initialize()
 {
@@ -21,6 +22,9 @@ bool Application::Initialize()
                                  nullptr);
         initSuccess = false;
     }
+    // Intialization of SerialController
+    this->serialController = new SerialController();
+    this->serialController->Connect("/dev/ttyACM0");
 
     this->basePath = SDL_GetBasePath();
     if (this->basePath == nullptr)
@@ -118,11 +122,15 @@ void Application::Run()
                 debugMode = !debugMode;
             }
         }
-
+        // serial controller update
+        if (serialController)
+        {
+            serialController->Update();
+        }
         // game update level
         if (currentLevel)
         {
-            currentLevel->Update(deltaTime, keys);
+            currentLevel->Update(deltaTime, keys, serialController);
         }
 
         // render game

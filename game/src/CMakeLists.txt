@@ -14,7 +14,9 @@ set(GAME_SORCES
     game/player.cpp
     game/player.h
     game/bullet.h
-    game/bullet.cpp)
+    game/bullet.cpp
+    driver/SerialController.cpp
+    driver/SerialController.h)
 # Create the executable from its source file.
 add_executable(galaxy "main.cpp" ${ENGINE_SOURCES} ${GAME_SORCES})
 target_include_directories(galaxy PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
